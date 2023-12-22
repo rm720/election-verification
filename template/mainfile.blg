@@ -1,0 +1,62 @@
+This is BibTeX, Version 0.99d (TeX Live 2022)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: mainfile.aux
+The style file: anuthesis.bst
+Database file #1: bib.bib
+Warning--entry type for "Kulyk2015ExtendingHT" isn't style-file defined
+--line 292 of file bib.bib
+Warning--entry type for "Bernhard2017SecurityPF" isn't style-file defined
+--line 459 of file bib.bib
+Warning--to sort, need author or key in hol4manual
+Warning--to sort, need author or key in iacr
+Warning--to sort, need author or key in Helios
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Warning--empty year in Helios
+Warning--empty year in iacr
+Warning--empty booktitle in Acemyan2015FromET
+Warning--empty booktitle in Cramer1997ModularDO
+Warning--empty booktitle in Gdel1966OnFU
+Warning--empty booktitle in Kumar2015ProofgroundedBO
+Warning--empty booktitle in Smyth2015ElectionVC
+You've used 51 entries,
+            3096 wiz_defined-function locations,
+            865 strings with 13405 characters,
+and the built_in function-call counts, 28330 in all, are:
+= -- 2089
+> -- 1306
+< -- 21
++ -- 504
+- -- 426
+* -- 2096
+:= -- 4375
+add.period$ -- 153
+call.type$ -- 51
+change.case$ -- 437
+chr.to.int$ -- 50
+cite$ -- 67
+duplicate$ -- 2166
+empty$ -- 2244
+format.name$ -- 566
+if$ -- 5567
+int.to.chr$ -- 2
+int.to.str$ -- 1
+missing$ -- 463
+newline$ -- 263
+num.names$ -- 192
+pop$ -- 1125
+preamble$ -- 1
+purify$ -- 346
+quote$ -- 0
+skip$ -- 773
+stack$ -- 0
+substring$ -- 840
+swap$ -- 957
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 447
+warning$ -- 10
+while$ -- 157
+width$ -- 0
+write$ -- 634
+(There were 12 warnings)

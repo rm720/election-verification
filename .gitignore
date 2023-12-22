@@ -1,0 +1,14 @@
+*.sig
+*.ui
+*.uo
+*.dat
+*Theory.*
+*.hollogs*
+*.HOLMK*
+*.sml~
+<<<<<<< HEAD
+*Holmakefile
+=======
+*.S
+*Holmake
+>>>>>>> ea036b6b13319e73a7dccea67d3c849f73b77561

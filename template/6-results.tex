@@ -1,0 +1,27 @@
+\chapter{Results}
+Upon successful completion, the project provides the following significant contributions:
+
+\section{Technique Improvement} 
+We enhanced the technique  proposed by Haines et. al. \cite{Haines2019VerifiedVF}, by offering an equivalent 
+counterpart that resides in HOL environment instead of Coq proof assistant. The benefits of such relocation
+ is that resulting executable of election verifier achieves end-to-end correctness. The reason is the following. 
+ The technique includes logical building blocks and proofs that have to be used to develop election verifier, 
+ since these all now in HOL, the resulting election verifier implementation will also be in HOL. Code from HOL 
+ can be compiled with CakeML compiler, producing guaranteed correct executable program. Such technology is not 
+ possible in Coq proof assistant, the previous residence of the technique. Thus, our enhancement, pushed election 
+ verifier correctness forward and consequently promoted electronic election trustworthiness.
+
+\section{Proof-Based Development}
+ We contribute to the maturity of proof-based software development by practicing 
+ it while working in HOL and CakeML on the technique improvement. These tools, 
+ besides of offering exceptional correctness opportunities, are still work in 
+ progress. Using such underdeveloped tools is tidies but rewarding. During our 
+ work we revealed limitations of the above tools, which give an opportunity for 
+ improvement. Specifically HOL4 packages system has duplicating Ring Theories. One is 
+ named IntegerRing\footnote{https://github.com/HOL-Theorem-Prover/HOL/blob/develop/src/integer/integerRingScript.sml} and 
+ another numRing\footnote{https://github.com/HOL-Theorem-Prover/HOL/blob/develop/src/ring/src/numRingScript.sml}. 
+ These competing Ring theories prevent from importing theory that uses Ring theory. 
+ The issue can be temporarily patched by disabling one of packages in the local built, however, 
+ currently this is a limitation. In addition, CakeML programming language is not able to open and read 
+ JSON file, because required library is has not yet been developed.
+
