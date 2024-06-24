@@ -8,3 +8,4 @@
 *.sml~
 *Holmakefile
 *.hol-vscode
+.DS_Store
