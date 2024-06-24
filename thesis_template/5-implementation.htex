@@ -1,0 +1,853 @@
+\chapter{Implementation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Overview}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+This chapter provides technical details on the development process, which was previously described at a 
+higher level in the Methodology Chapter. Here, we provide definitions of the data types and theorems we 
+used, as well as motivation for particular formulations. We do not include proofs, as they are lengthy 
+and deserve a separate document. The full proofs and code can be found on 
+Git\footnote{https://github.com/Ra6666/crypto_cake}.
+
+We present the definitions of elementary components that we used, definitions 
+of the composed Sigma Protocols, and formulations of the theorems to ensure their correctness. 
+Additionally, we provide definitions for the data types we utilise and the Verifiers for the election 
+transcript.
+
+Recall that our goal is to compose a Sigma Protocol, such that the type signature of its HonestVerifier matches 
+the Transcript of our election of interest, the IACR2022 director election. In order to do so, we define the 
+following elementary components, which are used as building blocks:
+\begin{itemize}
+    \item Abstract Sigma Protocol
+    \item Disjunctive Combiner
+    \item Conjunctive Combiner
+    \item Equivalence Combiner
+    \item Schnorr Sigma Protocol
+\end{itemize}
+To verify the IACR2022 director election, we need to verify three types of transcripts: Encryption, Collection, 
+and Tallying. To accomplish this, we will compose three Sigma Protocols, each of which matches one of the three 
+transcript types. In the following sections, we provide definitions of these composed Sigma Protocols and their 
+elementary components.
+\begin{itemize}
+    \item Schnorr Sigma Protocol
+    \item Equivalence Combination of Schnorr Sigma Protocol
+    \item Disjunctive Combination of Equivalence Combination of Schnorr Sigma Protocol
+\end{itemize}
+We will present the formulation of the theorems corresponding to each Sigma Protocol that we utilize:
+\begin{itemize}
+    \item Completeness
+    \item Special Soundness
+    \item Honest Verifier Zero-Knowledge
+    \item Simulator Correctness
+\end{itemize}
+We provide definitions for the data types we utilize and the Verifiers for the election transcript:
+\begin{itemize}
+    \item Result Verifier
+    \item Collection Verifier
+    \item Enctypion Verifier
+\end{itemize}
+
+The mathematical notation in this document may appear unfamiliar at 
+first glance, as it reflects the representation of mathematical entities in the HOL logic system, which may 
+differ from what we are accustomed to. For example, a Set is a function that takes an element and returns 
+either true or false depending on whether it is a member of the set.
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Abstract Components}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsubsection{Sigma Protocol Definition}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We use the following definition for abstract Sigma Protocol. 
+\begin{holmath}
+    \HOLthm[showtypes,width=70]{sigmaProtocol.datatype_SigmaProtocol} 
+\end{holmath} 
+% It is important to note that in HOL type system, set is a function that takes an element and returns either true 
+% if it is a member of the set or false if it is not. Hence, $F: \sigma -> \bool$ denotes a set $F$ of elements of type $\sigma$
+This definition captures the functionality required for operation as well as auxiliary functionality to be able to show correctness. 
+The type signatures of the components are designed to match each other in the flow of interaction; for example, HonestVerifier input matches the output of Prover\_0 and Simulator.
+The protocol allows a Prover to demonstrate to Verifier a possession of the secret witness, such that it is in Relation to a public statement. 
+We show how our definition of the protocol relates to its operation:
+\begin{enumerate}
+\item The Prover picks a random coin and computes a commitment using its function Prover\_0. The Prover sends this commitment to the Verifier.
+\item The Verifier picks a challenge and sends it to the Prover.
+\item The Prover computes a response using its function Prover\_1 and sends it back to the Verifier, along with the rest of the Transcript.
+\item The Verifier checks the Transcript using HonestVerifier. If the Transcript is valid, the Verifier accepts the proof.
+\end{enumerate}
+To ensure the properties of the Sigma Protocol and for the combiners functionalities, the following functions are required:
+\begin{itemize}
+\item Extractor: It takes two transcripts and outputs the witness. Required for the proof of Special Soundness property.
+\item Simulator: It takes a public transcript and produces a valid commitment for this Transcript without knowing a witness.
+\item SimulatorMap and SimulatorMapInverse: These functions are required to prove the Zero-Knowledge property via establishing a 
+bijection between Responses and RandomCoins, as described in the Related Work chapter and in \cite{Haines2019VerifiedVF}.
+\item Disjoint: The Extractor requires this property to ensure that two challenges are different.
+\end{itemize}
+A set of Challenges is required to be a Group to ensure that the Extractor can efficiently compute witness given two challenges and, 
+therefore, satisfy Special Soundness Property. Note that cross product of Groups also forms a Group; this fact makes a tuple of 
+challenges satisfy the abstract definition of Sigma Protocol. \\
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsubsection{Disjunctive Sigma Protocol Combiner}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We use the following definition for the Disjunctive of Sigma Protocols.\\
+\\
+\HOLthm[showtypes,nostile,width=100]{sigmaProtocol.SP_or_def}
+The Disjunctive Combiner allows us to build more complicated Sigma Protocols out of simpler
+ones. The statement of Disjunctive Combination consists of two values, at least one of which is in Relation to the witness. 
+The Prover wants to demonstrate that they know the witness. The operation is similar to the
+abstract Sigma Protocol, and the following shows how our definition relates to the operation.
+\begin{enumerate}
+\item The Prover picks two random coins and computes a commitment using function Prover\_0. 
+Function Prover\_0 returns two values, one is simulated without knowledge of the secret witness, and another is real and computed by 
+Prover\_0 function of underlying sigma protocol, using knowledge of the witness. Then Prover sends this commitment to the Verifier.
+\item The Verifier picks a challenge and sends it to the Prover. 
+\item The Prover computes a response using function Prover\_1; this response contains one real value and one simulated without knowledge of the secret. 
+Then The Prover sends it back to the Verifier along with the rest of the Transcript.
+\item The Verifier checks the Transcript using HonestVerifier. If the Transcript is valid, the Verifier accepts the proof. The HonestVerifier calls 
+HonestVerifier of underlying Sigma Protocol twice, and both calls have to accept. Even though one Transcript is simulated, it must be accepted because 
+the Simulator function produces the correct Transcript. 
+\end{enumerate}
+The Disjoint property in the Disjunctive Combination of Sigma protocols refers to the requirement that the challenge must be distinct for the 
+Extractor to compute the secret. This is crucial for the Special Soundness property, which asserts that the secret can be computed if a prover 
+can answer two different challenges for the same initial commitment.
+Since the challenge is a single value, Disjoint becomes inequality for Disjunctive Combination.
+
+In the context of a disjunctive combination, the Prover is providing a proof for at least one of two statements. The Verifier then challenges the 
+Prover, who must respond correctly to maintain the validity of the proof. If the challenges were not distinct (i.e., if they were equal), the 
+Prover could respond correctly to one challenge and incorrectly to the other yet still have the overall proof be accepted. This would violate the 
+Special Soundness property and allow a dishonest prover to convince a verifier of a false statement.
+
+Extractor of Disjunctive Combination is designed to take two responses, two challenges and compute the witness. 
+The function first checks if the challenges belonging to responses are not equal. If they are not equal, it calls the Extractor function of the 
+underlying Sigma Protocol because, in the case of unequal challenges, the Extractor can directly compute the witness. Otherwise, if the challenges 
+are equal, then it means that the same challenge was used in both transcripts. In this case, the Extractor cannot directly compute the witness. 
+Therefore, it computes two new challenges for itself. 
+
+Simulator of Disjunctive Combination computes two commitments and returns an accepting transcript without knowledge of the secret. 
+
+SimulatorMap and SimulatorMapInverse are designed to match each other and be able still to 
+provide a bijection using a more complicated transcript.\\
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsubsection{Conjunctive Sigma Protocol Combiner}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We use the following definition for the Conjunctive Combiner of Sigma Protocol. \\
+\HOLthm[showtypes,width=70]{sigmaProtocol.SP_and_def}
+
+Thie Conjunction of Sigma Protocols is essentially running two instances of underlying Sigma Protocol in parallel. 
+All the functionalities directly call the underlying Sigma Protocols. 
+The Extractor, Simulator, SimulatorMap, and SimulatorMapInverse functions are all derived directly from the underlying Sigma Protocol. 
+
+Similarly to Disjunctive Combination, the statement of Conjunctive Combination consists of two values, both of which are in Relation to its own witness. 
+The Prover aims to demonstrate that they know such a pair of witnesses. The operation is akin to the vectorised operation of abstract Sigma Protocol, 
+and the following illustrates how our definition relates to the operation.
+
+\begin{enumerate}
+\item The Prover selects two values of random coin and computes two values of commitment using the Prover\_0 function. This function returns two values, 
+both of which are valid (not simulated) and computed by the Prover\_0 function of the underlying sigma protocol, using the knowledge of the witness. 
+The Prover then sends this commitment to the Verifier.
+\item The Verifier selects a challenge and sends it to the Prover. The challenge here is a cross-product of the challenges of the underlying Sigma Protocol. 
+The cross-product of Groups also forms a Group; this fact makes a tuple of challenges satisfy the abstract definition of Sigma Protocol.
+\item The Prover computes a response using the Prover\_1 function; this response contains two valid transcripts. The Prover then sends it back to the 
+Verifier along with the rest of the Transcript.
+\item The Verifier checks the Transcript using HonestVerifier. If the Transcript is valid, the Verifier accepts the proof. The HonestVerifier calls the 
+HonestVerifier of the underlying Sigma Protocol twice, and both calls must be accepted. 
+\end{enumerate}
+
+The Disjoint property in the Conjunctive Combination of Sigma protocols refers to the requirement that the challenge must be distinct for the 
+Extractor to compute the secret. This is crucial for the Special Soundness property, which asserts that the secret can be computed if a prover 
+can answer two different challenges for the same initial commitment.
+Since the challenge is a tuple, Disjoint becomes elementwise disjoint of the underlying protocols.
+
+In the context of a Conjunctive Combination, the Prover is providing a proof for both statements. The Verifier then challenges the Prover, 
+who must respond correctly to maintain the validity of the proof. If the challenges were not distinct, the Prover could respond correctly 
+to one challenge and incorrectly to the other yet still have the overall proof accepted. This would violate the Special Soundness property 
+and allow a dishonest prover to convince a verifier of a false statement.
+
+The Extractor of the Conjunctive Combination is designed to take four responses and four challenges and then compute the two witnesses. 
+The function duct delegates the calculation of each witness to the Extractor of the underlying Sigma Protocol.
+
+The Simulator of the Conjunctive Combination computes two commitments and returns a pair of accepting transcripts without knowledge of any secret. 
+
+SimulatorMap and SimulatorMapInverse, similarly to the Disjunctive Combiner, are designed to match each other and be able to provide a 
+bijection using a more complicated transcript. In this case, they combine the 
+corresponding functions of underlying Sigma protocols.\\
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsubsection{Equivalence Sigma Protocol Combiner}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We use the following definition for the Equivalence of Sigma Protocols.\\
+\begin{holmath}
+\HOLthm[showtypes,nostile,width=100]{sigmaProtocol.SP_eq_def}
+\end{holmath}   
+
+The Equality Combiner of a Sigma Protocol, as defined above, is a powerful tool that allows a Prover to demonstrate that they possess a single witness that is in Relation to a pair of statements simultaneously.
+
+The Equality Combiner is constructed from a single Sigma Protocol. Statements and Commitments are pairs of values, while others are single values. The Relation of the Equality Combiner is defined as the conjunction of the Relations of two statements and the same witness. 
+
+The Prover_0 function of the Equality Combiner computes two commitments, one for each statement, using the same witness and random coin. This is consistent with the goal of demonstrating that the same witness satisfies both statements.
+
+The Prover_1 function computes a response for the first statement using the witness, random coin, and challenge. Note that the same challenge is used for both statements, which is crucial for maintaining the zero-knowledge property of the protocol.
+
+The HonestVerifier function checks the validity of the transcripts for both statements. Both transcripts must be valid for the Equality Combiner HonestVerifier to accept the proof.
+
+The Extractor, Simulator, SimulatorMap, and SimulatorMapInverse functions are all derived directly from the underlying Sigma Protocol. 
+This is because the Equality Combiner is essentially running two instances of underlying Sigma Protocol in parallel, 
+with the same witness and challenge for both instances.
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Properties of Sigma Protocol}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\textbf{Well Formed Sigma Protocol Definition}\\
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We introduced this theorem for Sigma Protocol and named it Well-formed Sigma Protocol Theorem. This property is essentially a part of the definition of Abstract Sigma Protocol. It is influenced by the requirements stated in the paper by \cite{Haines2019VerifiedVF}  where they state:
+"In addition we require the challenge space to be an abelian group, the algorithms to output the transcript they receive without change, that algorithm V_0 outputs the challenge from its randomness tape without modification, and that the simulator produces accepting transcripts on all inputs"\cite{Haines2019VerifiedVF} .
+We separated these requirements into a theorem, along with the other theorems required for the definition of Sigma Protocol. The mathematical formulation of the theorem, as defined in HOL, is as follows:
+The mathematical formulation of the theorem is as follows.
+
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.WellFormed_SP_def}
+\end{holmath}   
+
+\newpage
+
+The above theorem provides a definition of a Well-formed Sigma Protocol. The purpose of this theorem is to clearly define the Ranges and Domains of the functional components of Sigma Protocol. 
+Although the Abstract Sigma Protocol defines the type signatures of its functions, it does not specify their domains. 
+For instance, Prover_0 returns a value of type $\gamma$, but this does not necessarily mean that the output belongs to the set of 
+Commitments. Rather, it denotes that the type of elements in Commitments and the output of Prover_0 are the same, which is insufficient.
+To define the domains of the function variables, the definition of the Sigma Protocol requires the prescription of sets. However, the 
+SigmaProtocol datatype does not include this information, and it must be augmented with the definition of the Well-formed property.\\
+Now we will explain what each condition means in this definition.
+First, Challenges have to be an Abelian (Commutative) Group. This condition was used by \cite{Haines2019VerifiedVF} 
+to allow the arithmetic of the Group.
+
+Next, we require Disjoint to imply inequality. Disjoint is a stronger property than inequality; 
+tuples can be not equal but not disjoint. For the Conjunction Combiner, 
+this is critical because if the challenge tuple is not disjoint in a way that one element of the tuple is shared, 
+then one of the underlying Sigma Protocols is compromised, as Special Soundness does not hold.\\
+The Well-formed theorem restricts the image of the functions to the dedicated sets. Specifically, 
+Prover_0 must return a value that belongs to the Commitments set, Prover_1 must return a value that belongs to the 
+Responses set, Extractor must return a value that belongs to the Witnesses set, and Simulator must return a cross 
+product that is of the same type as Transcript, which HonestVerifier can accept. Additionally, SimulatorMap's 
+output must belong to Responses, and SimulatorMapInverse's output must belong to RandomCoins.
+Furthermore, we require that Simulator does not change the Transcript it is given but only adds a proper commitment value to it.\\
+However, it is important to note that the Well-formed property is not just a technical requirement. Rather, it ensures that the 
+functions used in the protocol operate as intended and are well-defined. Without this property, it would be difficult to reason 
+about the protocol and its properties. Therefore, the Well-formed property is a crucial aspect of the protocol's 
+design and should not be overlooked.
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsubsection{Well Formed Equality Sigma Protocol Definition}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Equality Combiner requires additional properties in the Well-formed theorem apart from the previously mentioned Well-formed theorem.
+
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.Eq_WellFormed_SP_def}
+\end{holmath} 
+
+In addition to the requirements listed previously, the Well-formed property has different specifications for the Equality Combiner. In this case, we require that the Sigma Protocol have Prover_1 not affect the statement and commitment and simply pass them through. This is because the commitment has already been computed at the commitment stage and must remain unchanged. The statement also should not change from the beginning to the end. The presence of these parameters that are not involved in computation may seem unnecessary, but it was a design choice made by \cite{Haines2019VerifiedVF} to ensure that the interfaces of the interacting components matched.
+Similar requirements apply to SimulatorMap and SimulatorMapInverse. The output of these functions should belong to the appropriate set, and the statement should be a transit variable.
+\newpage
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsubsection{Completeness Theorem}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+The completeness property is a necessary requirement for the Sigma Protocol, as defined by Cramer \cite{Cramer1997ModularDO}. 
+This property was also utilised by Haines \cite{Haines2019VerifiedVF}. The completeness property specifies that the Honest Verifier will always accept a transcript that an Honest Prover generates. This definition has been directly taken from the work of Haines \cite{Haines2019VerifiedVF}.
+This theorem is general and will be proven for all the instances of Sigma Protocols we construct.
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.Complete_SP_def}
+\end{holmath} 
+
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsubsection{Special Soundness Theorem}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+The Special Soundness property is a crucial requirement for the Sigma Protocol, as defined by as well Cramer \cite{Cramer1997ModularDO}. This property was also employed by Haines \cite{Haines2019VerifiedVF}. Special Soundness asserts that if a Prover can answer two different challenges for the same initial commitment, then the secret (witness) can be computed. In Haines version, it states that: if a Prover can answer two different challenges for the same initial commitment, then there exists an Extractor that can compute secret (witness). 
+
+This property is fundamental for the security of the Sigma Protocol, ensuring that any prover who can convince the Verifier in this way must indeed know the secret.
+
+This theorem is general and will be proven for all instances of Sigma Protocols we construct. It's important to note that Special Soundness does not imply that the Prover cannot cheat but rather that any successful cheating strategy would reveal the secret, thus maintaining the integrity of the protocol.
+
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.SpecialSoundness_SP_def}
+\end{holmath}  
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsubsection{Honest Verifier Zero-Knowledge Theorem}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+The Sigma Protocol relies on the Zero-Knowledge property, which ensures that the Verifier learns nothing more than the validity of the statement being proven. This characteristic is outlined by Cramer \cite{Cramer1997ModularDO} and incorporated by Haines \cite{Haines2019VerifiedVF}. Specifically, Zero-Knowledge requires that for every possible Transcript that could be generated by an interaction between the Prover and the Verifier, there exists a simulation that can generate an indistinguishable transcript without knowledge of the secret (witness).
+As Haines \cite{Haines2021DidYM} states, it suffices to "show that there exists a bijection between the transcripts generated by taking the random coin from the commit in P0 and by taking the response at random in the simulation." We take our formulation of this theorem directly from the work of Haines and restate it in HOL as follows. Then, we prove this theorem for every Sigma Protocol that we construct.
+
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.HonestVerifierZeroKnowledge_SP_def}
+\end{holmath}  
+
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsubsection{Simulator Correctness Theorem}
+%------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+The Simulator Correctness property is a vital characteristic of the Sigma Protocol, as outlined by Cramer \cite{Cramer1997ModularDO} and further utilised by Haines \cite{Haines2019VerifiedVF}. The Simulator Correctness property asserts that for every statement and challenge, the Simulator can generate a transcript that the Honest Verifier will accept, even without knowledge of the witness. 
+
+This theorem is universal and will be validated for all instances of Sigma Protocols we construct. The Simulator Correctness property is essential to the Zero-Knowledge property of the Sigma Protocol, ensuring that a convincing transcript can be generated without revealing any secret information. 
+
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.SimulatorCorrectness_SP_def}
+\end{holmath}  
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Disjunctive Combiner Properties}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+We have proven the invariance of Sigma Protocol properties under Disjunctive Combination. The properties of Sigma Protocol, such as: Well-formed, Completeness, Special Soundness, Honest Verifier Zero-Knowledge, and Simulator Correctness are preserved under Combination. In general, the theorem states: The underlying Sigma Protocol retains its properties even after Disjunctive Combination. These theorems hold for abstract Sigma Protocols, which means that they can be applied to any Sigma Protocol. We can use this invariance property to verify the correctness of our composition of Sigma Protocols.
+
+We start with Well-formed theorem and then visit all the rest of the theorems. This theorem states that if the underlying Sigma protocol is correct, then the Combination is also correct.
+
+\textbf{Wellformed Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.WellFormed_SP_or_thm}
+\end{holmath}  
+
+Similarly to the previous theorem, we proved that Simulator correctness is also preserved as long as the protocol is Well-Formed.
+
+\textbf{Simulator Correctness Theorem}\\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.SimulatorCorrectness_SP_or_thm}
+\end{holmath}  
+
+Next, we proved that Completeness is preserved inder Disjunctive Combination assuming Simulator Correctness and Well-formed of the underlying Sigma protocol. 
+
+\textbf{Completeness Theorem}\\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.Complete_SP_or_thm}
+\end{holmath}  
+
+The Special Soundness property is preserved under Disjunctive Combination, provided that the Sigma protocol is Well-formed and that the Disjoint operation is equivalent to inequality. However, it should be noted that this formulation is not as general as the others. The condition that the Disjoint operation must be inequality appears somewhat artificial and was a specific design choice made by Haines, \cite{Haines2019VerifiedVF}, which is taken from their work.
+
+\textbf{Special Soundness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.SpecialSoundness_SP_or_thm}
+\end{holmath}  
+
+Honest Verifier Zero-Knowledge (HVZK) property is also invariant under Disjunctive Combination, and we have proven it assuming that the Sigma protocol is Well-formed.
+
+\textbf{Honest Verifier Zero-Knowledge Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.HonestVerifierZeroKnowledge_SP_or_thm}
+\end{holmath}  
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conjunctive Combiner Properties}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Similarly, we have proven the invariance of the Sigma Protocol properties under Conjunctive Combination, assuming the Sigma protocol is Well-formed. We started in the same way with Well-formed property. 
+The proofs are straight forward for this combiner: we assume that both of underlying sigma protocols have a property and conslude that this property is preserved after combination. 
+
+We have demonstrated the invariance of Sigma Protocol properties under Conjunctive Combination, provided the underlying Sigma protocols are Well-formed. We begin with the Well-formed property and proceeded in a similar manner.
+The proofs for this combiner are straightforward. We make the assumption that both underlying Sigma protocols possess property and conclude that combining them preserves this property.
+
+\textbf{Wellformed Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.WellFormed_SP_and_thm}
+\end{holmath}  
+
+
+\textbf{Completeness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.Complete_SP_and_thm}
+\end{holmath}  
+
+
+\textbf{Special Soundness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.SpecialSoundness_SP_and_thm}
+\end{holmath}  
+
+
+\textbf{Simulator Correctness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.SimulatorCorrectness_SP_and_thm}
+\end{holmath}  
+
+
+\textbf{Honest Verifier Zero-Knowledge Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.HonestVerifierZeroKnowledge_SP_and_thm}
+\end{holmath}  
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Equality Combiner Properties}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+We repeat the process for Equality Combiner. Well formed theorem for this combiner is an extended version of the standard Well-formed theorem. And since Well-formed theorem for Equality Combiner includes a Well-formed theorem, we can prove only one. We have proven the invariance of the Sigma Protocol properties inder Equality combiner.
+
+
+\textbf{WellFormed Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.Eq_WellFormed_SP_eq_thm}
+\end{holmath}  
+
+\textbf{Simulator Correctness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.SimulatorCorrectness_SP_eq_thm}
+\end{holmath}  
+
+\textbf{Completeness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.Complete_SP_eq_thm}
+\end{holmath}  
+
+\textbf{Special Soundness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.SpecialSoundness_SP_eq_thm}
+\end{holmath}  
+
+\textbf{Honest Verifier Zero-Knowledge Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.HonestVerifierZeroKnowledge_SP_eq_thm}
+\end{holmath}  
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Schnorr Sigma Protocol}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\textbf{Protocol Definition}
+
+The Schnorr Sigma Protocol is an interactive cryptographic protocol with an associated zero-knowledge proof system. 
+We explained Schnorr protocol operation in Background Chapter.
+We formulate Schnorr Sigma Protocol according to the definition used by \cite{Haines2019VerifiedVF}.  
+
+\begin{align*}
+    &\text{Schnorr\_SP } (Group \ G, \ q) =  \\
+    &\{\\
+    &\quad \text{Statements}:= G \times G, \\
+    &\quad \text{Witnesses}:= \{1, 2, \ldots, q-1\} \\
+    &\quad \text{Relation}:= \lambda (s_1, s_2) \ w. \ s_1^{w} = s_2 \\
+    &\quad \text{RandomCoins}:= \{1, 2, \ldots, q-1\} \\
+    &\quad \text{Commitments}:= G \\
+    &\quad \text{Challenges}:= Z\text{add } q \\
+    &\quad \text{Disjoint}:= \lambda a \ b. \ a \neq b \\
+    &\quad \text{Responses}:= \{1, 2, \ldots, q-1\} \\
+    &\quad \text{Prover\_0}:= \lambda (s_1, s_2) \ w \ r. \ s_1^{r} \\
+    &\quad \text{Prover\_1}:= \lambda (s_1, s_2) \ w \ r \ c \ e. \ r \oplus e \otimes w \\
+    &\quad \text{HonestVerifier}:= \lambda ((s_1, s_2), c, e, t). \ s_1^{t} = c \times s_2^{e} \\
+    &\quad \text{Extractor}:= \lambda t_1 \ t_2 \ e_1 \ e_2. \ \text{if } e_1 = e_2 \ \text{then } 0 \ \text{else } ((t_1 \ominus t_2) \oslash (e_1 \ominus e_2)) \\
+    &\quad \text{Simulator}:= \lambda (s_1, s_2) \ t \ e. \ ((s_1, s_2), s_1^{t} \times \frac{1}{s_2^{e}}, e ,t)) \\
+    &\quad \text{SimulatorMap}:= \lambda (s_1, s_2) \ w \ e \ r. \ r \oplus e \otimes w \\
+    &\quad \text{SimulatorMapInverse}:= \lambda (s_1, s_2) \ w \ e \ t. \ t \ominus e \otimes w \\
+    &\}
+\end{align*}
+
+We give a brief explanation of the components and their relation to the operation of the Schnorr protocol here.
+
+\begin{itemize}
+\item \textbf{Group G} is a multiplicative group formed by modulo of a large prime \textbf{p}, such that the order of this group is \textbf{q}.
+    \item \textbf{Statements} is a set of public values for which the Prover claims knowledge of the discrete logarithm. They are two elements and both are generators from the group~\textbf{G}.
+    \item \textbf{Witnesses}  is a set of the secrets that the Prover knows and wants to convince the Verifier of, without revealing it. The witness is an element from the set of integers modulo \textbf{q}, where \textbf{q} is the order of the group~\textbf{G}.
+    \item \textbf{Relation} defines the relationship between the Statements and Witnesses. Specifically, the relation is that raising \textbf{s}_1 to the power of \textbf{w} (the witness) equals \textbf{s}_2.
+    \item \textbf{RandomCoins}  are the random values that the Prover uses to generate the initial commitment. It is also an element from the set of integers modulo \textbf{q}.
+    \item \textbf{Commitments}  are the initial values that the Prover sends to the Verifier in the first step of the protocol. They are computed as \textbf{s1} raised to the power of \textbf{r} (the random coin).
+    \item \textbf{Challenges}  are values that the Verifier sends to the Prover in the second step of the protocol. They are elements from the set of integers modulo \textbf{q}.
+    \item \textbf{Disjoint} function checks that two challenges are not equal, ensuring they are distinct.
+    \item \textbf{Responses}  are values that the Prover sends to the Verifier in the third step of the protocol. The response is calculated by adding the product of the challenge and witness to the power of random coin.
+    \item \textbf{Prover\_0} and \textbf{Prover\_1}  define the actions of the Prover in the first and third steps of the protocol respectively.
+    \item \textbf{HonestVerifier}  checks that the Prover's response is correct, by verifying that raising \textbf{s}_1 to the power of the response equals the product of \textbf{c} and \textbf{s}_2 raised to the power of \textbf{e}.
+    \item \textbf{Extractor}  is a hypothetical entity used in the zero-knowledge proof, which would be able to compute the witness if it sees two transcripts of the protocol with the same commitment but different challenges.
+    \item \textbf{Simulator}  is a hypothetical entity used in the zero-knowledge proof, which is able to produce a transcript of the protocol that looks indistinguishable from a real one, without knowing the witness.
+    \item \textbf{SimulatorMap} and \textbf{SimulatorMapInverse}  form a bijection from Responces to Randomness that suffices to show for the Honest Verifier Zero Knowledge Property.
+\end{itemize}
+
+We prove all the required theorems for Schnorr protocol in order to be able to guarantee that our formulation of Schnorr protocol is correct.
+
+\textbf{Wellformed Theorem}\\
+We prove that Schnorr protocol is Well-formed, we use the extended definition (Well-formed for Equality Combiner) of the Well-formed theorem, which lets us preserve this property after applying Equality Combiner. And, since this extended definition of Well-formed theorem includes the original definition then the Well-formed property will be preserved after combination with other combiners. 
+Schnorr protocol operates on a finite cyclic group of modulo prime of prime order q. In order to instantiate Schnorr protocol, we need to provide such group as input parameter, along with the value of prime order of this group. Shnorr protocol does not check if these parameters are correct, but the properties will not hold. We assume that the public settings such as group \textbf{G}and prime textbf{q} are correct, as we stated in the Methodology chapter. Based on above we state the assumption to the Well-formed theorem: prime \textbf{p}, finite cyclic group \textbf{G}.
+
+Schnorr Sigma Protocol Well-formed Theorem:
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.schnorr_eq_wellformed_thm}
+\end{holmath}  
+
+\textbf{Completeness Theorem}
+We prove the Completeness theorem for Schnorr with the same assumptions of correct input parameters. We do not need to specify anything more than that because Schnorr protocol definition matches the definition of abstract sigma protocol, and the Completeness property can be applied directly to Schnorr protocol. The formulation of the Completeness theorem is very simple.
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.schnorr_Completeness_thm}
+\end{holmath}  
+
+\textbf{Special Soundness Theorem}
+Similarly we state and prove Special Soundness of Schnorr Protocol
+
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.schnorr_special_soundness_thm}
+\end{holmath}  
+
+\textbf{Simulator Correctness Theorem}
+
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.schnorr_simulator_Completeness_thm}
+\end{holmath}  
+
+\textbf{Honest Verifier Zero-Knowledge Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.schnorr_honest_verifier_zk_thm}
+\end{holmath}  
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Equality Schnorr Sigma Protocol}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We construct the Equality Schnorr Sigma Protocol by applying the Equality Combiner to Schnorr Sigma Protocol. 
+We prove all the required theorems for this new sigma protocol in order to be able to guarantee that our formulation of 
+Equality Schnorr Sigma Protocol is correct. The properties formulation is similar to the once we attenden earlier.
+Lets look at the transcript type of this composit protocol.
+By the definition it has 
+Statemets of Schnorr has 2 values, after applying Equivalence Combiner we have 4 values,
+Note that the statement of such protocol will contain 4 values, 
+
+\textbf{Wellformed Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.eq_schnorr_eq_wellformed_thm}
+\end{holmath}  
+
+\textbf{Completeness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.eq_schnorr_Completeness_thm}
+\end{holmath}  
+
+\textbf{Simulator CorrectnessTheorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.eq_schnorr_simulator_Completeness_thm}
+\end{holmath}  
+
+\textbf{Special Soundness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.eq_schnorr_special_soundness_thm}
+\end{holmath}  
+
+\textbf{Honest Verifier Zero-Knowledge Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.eq_schnorr_honest_verifier_zk_thm}
+\end{holmath}  
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Disjunctive Equality Schnorr Sigma Protocol}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+This is a Disjunctive combination of Equivalence Combibation of Schnorr Sigma Prcotocol.
+We compose this protocol because we need to match a transcript for every subquestion encryption 
+and the type sigmnature of HonestVerifier of this combinatiion matches the 
+transcript. We prove all the required theorems for this new sigma protocol in order to be 
+able to guarantee that our formulation is correct. 
+The formulation of the teorems as follows:
+
+\textbf{Wellformed Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.or_eq_schnorr_wellformed_thm}
+\end{holmath}  
+
+\textbf{Completeness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.or_eq_schnorr_Completeness_thm}
+\end{holmath}  
+
+\textbf{Simulator Correctness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.or_eq_schnorr_simulator_Completeness_thm}
+\end{holmath}  
+
+\textbf{Special Soundness Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.or_eq_schnorr_special_soundness_thm}
+\end{holmath}  
+
+
+\textbf{Honest Verifier Zero-Knowledge Disjunctive Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.or_eq_schnorr_honest_verifier_zk_thm}
+\end{holmath}  
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Election Transcript}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In this section we will look at election transcript and how we can construct a protocol that HonestVerifier is able to verify this trascript.
+We downloadd the election transcript and analyse the transcript. We need to mtch it with type signature of the composition of sigma protocols.
+The data has three transcript: Ballots, Trustee and Result. All the URL where to get it can be found online on our GIT repo. 
+Election has 6 questions. Fiest question has 6 subquestions, and last qyestions has 2 ssubquestions, and all the rest questions 
+did not have subquestions. In total we have 12 identical subquestions transcripts for each ballot. 
+Ballot transcript has the following structure for each subquastion:
+\begin{verbatim}
+    {
+        "choices": [
+            {
+                "alpha": "948965971676891550942079264498...",
+                "beta": "190347408762624509980165044036..."
+            }
+        ],
+        "individual_proofs": [
+            [
+                {
+                    "challenge": "269141883152924208986717155676...",
+                    "commitment": {
+                        "A": "540808612535583433188607927199...",
+                        "B": "107735550308610394135445784171..."
+                    },
+                    "response": "175821434649672982484478267392..."
+                },
+                {
+                    "challenge": "344153779330504803938721572031...",
+                    "commitment": {
+                        "A": "146930799999365638968749825487...",
+                        "B": "830181299909333181038386347504..."
+                    },
+                    "response": "209352406886248814735015770045..."
+                }
+            ]
+        ],
+        "overall_proof": [
+            {
+                "challenge": "493758243880435707864329081732...",
+                "commitment": {
+                    "A": "256593473450918295218100423318...",
+                    "B": "138516722933639402683046797772..."
+                },
+                "response": "313157115925983601867016194545..."
+            },
+            {
+                "challenge": "119537418602993305061109645970...",
+                "commitment": {
+                    "A": "144875023541852677150605318396...",
+                    "B": "115761795062520930881123377056..."
+                },
+                "response": "178943451153184971790520872252..."
+            }
+        ]
+    }
+    
+    \end{verbatim}
+    
+    We can interpret it as follows: alpha abd beta is a siphertext, each contains en encrypted vote, 
+    sum of which is required to be 1 accordong to Helios Voting Specificartion \footnote{https://heliosvoting.org/}.
+    Therefore choices is a statemets with actual vote being a witness. This structire resembles Disjunctive Combiner. 
+    Then we have twho sets of proof with one challenge and one response with two commitments, 
+    such structure resembles Euality Combiner. We used specification of Helios Voting to parse the meaning of the 
+    values in transcript. Then we found the matching HonestVerifier. For verification of 
+    ballot encryption transcript we use composition HonestVerifier of Sigma Ptotocol made as  
+    Disjunctive Combiner of Equivalence Combiner of Schnorr Protocol.
+
+    Similarly, we looked at the Trustee transcript. It has the following structure for every subquestion.
+
+    \begin{verbatim}
+        {
+          "decryption_factor": "6617784029103468576029433103884365854...",
+          "challenge": "242473482503002400626120662854658713209134456843",
+          "commitment": {
+            "A": "213147201145067147516028245305404487383687574619601...",
+            "B": "354972499477033618824925557030012787458075288383339...",
+          },
+          "response": "23679669953028420274457202462052666498137769840839"
+        }
+        \end{verbatim}
+        
+    Using specification of Helios we can match this trancript to HonestVerifier type signature of Equivalence Combiner of Schnorr Protocol.
+    
+    The last transcript we want to match is Election result. It has the following structure fro each subquestion:
+    Result is gust a single integer numbe rof every subquestion. Since the result is tallied homomorphically we need 
+    to tally the ballots to verify teh results. 
+    For each subquestion we have to homomorphically add encrypted votes and combine decryption keys from trustees.
+    
+    We match the the transcript for Verifier for resut with Schnorr protocol HonestVerifier.
+    We build a transcript (s, c, e, t)
+    where s is a statement (s_1, s_2)
+    where s_1 is generator g, and s_2 is group inverse of decryption factors multiplied homomorphically.
+    commitment c is the homomorphically tallied votes for one subquestion.
+    challenge e is 1,
+    and response t is a question result.
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Transcript Datatype}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+We parsed and rearrangesd the election public evidence data to make easier to ingest for the Verifier.
+We defined the following data classes to represent the election data for the verifiers.
+
+\textbf{PublicKey} is represented by four-tuple of natural numbers
+Here g is a group generator, p and q are large primes, and y is a public key. \\
+
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_PublicKey}
+\end{holmath}  
+
+\textbf{Choice} is an encripted vote to a subquestion is presented as a pair of ciphertexts, 
+which are large natural numbers.
+Values alpha and beta was explained in Background Chapter. \\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_Choice}
+\end{holmath}  
+
+\textbf{Commitment} for our compose sigma protocol consists of two elements A and B, 
+which are both large natural numbers. \\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_Commitment}
+\end{holmath}  
+
+\textbf{Proof} data consists of a challenge, commitment, and response. \\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_Proof}
+\end{holmath}  
+
+\textbf{TrusteesPublicKeys}. 
+The election has multiple trustees, their public keys all have to be part fo decryption.
+This data class contains the public keys of all trustees under the value \textbf{ys}.
+The other values as described in \textbf{PublicKey} data class. \\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_TrusteesPublicKeys}
+\end{holmath}  
+
+\textbf{Answer} is a interface datatype for encryprtion verifier,
+contains all necessary data for encryptopn vefirication one subquestion.\\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_Answer}
+\end{holmath}  
+
+\textbf{TrusteeData} is an interface datatype for decryption verification for one subquestion\\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_TrusteeData}
+\end{holmath}  
+
+\textbf{ResultData} represents the data for election result verification for one subquestion\\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_ResultData}
+\end{holmath}  
+
+\textbf{Question} datatype collects in it all three peices of daya that is needed 
+for verification of one subquestion by three verifiers\\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_Question}
+\end{holmath}  
+
+
+\textbf{IACR2022Election} The whole election cam be represented as a list of 12 subquestions.
+Where each of them should undergone three types of verification.\\
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.datatype_IACR2022Election}
+\end{holmath} 
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Verifier for Ballot Tallying}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In this section, we consider how to construct a verifier for the election result. The verifier function uses the 
+Schnorr sigma protocol and calls its Honest Verifier on the transcript from the election public evidence data. 
+In order to verify the election, we need to verify every subquestions, so we run Schnorr Honest Verifier on every subquestion.
+Alternatively, we could have used another conjunctive combiner, but this would have caused more complicated code. 
+Instead, we simply run the verifier on every question and take a conjunction of the results. 
+It is also better to have every subquestion verified individually, because if there is something wrong, we can locate the issue.
+
+\textbf{Verifier}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.verify_result_def}
+\end{holmath}  
+
+We introduce definition of the theorem for Well-Formed result data. 
+This theorem helps to ensure that the data makes sense. 
+Well-Formed Result Theorem requires the result data to have prime \textbf{p} and \textbf{q}, and the generator to be in the Group. 
+All the ciphertexts beta must also be in the group.
+
+Note that in our work, we use the Algebra Library HOL written by Joseph 
+Chan \cite{Chan2018ClassificationOF}. Group modulo p is defined as a set of 
+elements from 0 to p-1 equipped with group operation. 
+The elements of the group are not congruence classes but natural numbers.
+
+In order to be able to use the Sigma Protocol, we want to make sure that 
+all the values involved are in the required range. This is because we assume 
+that we are given correct numbers from the election public evidence.
+Well-Formed Result Theorem states as wollows:
+\newpage
+
+\textbf{Transcript Well-formed Definition}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.result_well_formed_def}
+\end{holmath}  
+
+\subsubsection{Realistic Verifier}
+The HonestVerifier of the Sigma Protocol is not usable outside HOL and cannot be 
+compiled as it is. This is because the CakeML compiler is verified, meaning that the compiled 
+program will do exactly what the code states. However, the code of the Verifier uses group 
+elements and group operations, which are not machine types and cannot be instantiated.
+
+A common technique to address this issue is to create a duplicate equivalent function 
+that uses machine types and efficient computation. This function can then be proved to 
+be equivalent to the original function on the given input. This Realistic Verifier uses 
+modular operations and machine types.\\
+
+\textbf{Realistic Verifier}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.verify_result_real_def}
+\end{holmath}  
+
+We have to show that the Realistic Verifier is equivalent to the original one.
+We show this by the following theorem \\
+\textbf{Equivalence of Verifiers Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.verify_result_equivalent_def}
+\end{holmath}  
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Verifier for Ballot Collection}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+To construct a verifier for the collection transcript of an election, 
+we use a similar approach. This verifier uses the Equivalence Combination of Schnorr Sigma Protocol. 
+We instantiate the Composite Sigma Protocol inside the verifier and call its 
+HonestVerifier on the collection transcript. This verification must be 
+performed 36 times, once for each trustee and subquestion.
+
+\textbf{Verifier Definition}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.verify_decryption_def}
+\end{holmath}  
+We define what it means for the transcript numbers to be well-formed in 
+order to satisfy the assumption of the following theorem. We expect the 
+public key to be correctly formed and the numbers to be in the range from 1 to p-1.
+\textbf{Transcript Wellformed Definition}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.trustee_well_formed_def}
+\end{holmath}  
+We define a computationally efficient election verifier to be able to compile it.
+This verifier used modular arithmetic and machine types instead of group elements and operations.
+\textbf{Realistic Verifier}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.verify_decryption_real_def}
+\end{holmath}  
+We have to show equivalence between the verifiers to preserve correctness.
+\textbf{Equivalence of Verifiers Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.verify_decryption_equivalent_def}
+\end{holmath}  
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Verifier for Ballot Encryption}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textbf{Verifier}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.verify_encryption_def}
+\end{holmath}  
+
+\textbf{Transcript Wellformed Definition}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.answer_well_formed_def}
+\end{holmath}  
+
+\textbf{Realistic Verifier}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.verify_encryption_real_def}
+\end{holmath}   
+
+\textbf{Equivalence of Verifiers Theorem}
+\begin{holmath}
+    \HOLthm[showtypes,nostile,width=70]{sigmaProtocol.verify_encryption_equivalent_def}
+\end{holmath}  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Compilation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+At this stage, we have defined three the equivalent verifiers and proved that they are equivalent to the original ones. 
+Since we compiled SigmaProtocol Theory in HOL we can import it as a library in CakeML file.
+Then we can compile funciton in CakeML.
+We do not have any issues with the compilation 
+of the verifiers. However, we do have an issue with reading JSON data in CakeML. 
+CakeML does not have the functionality to read JSON files, and developing one would be a major 
+task outside of the scope of this project. The final outcome of our work is proven-correct verifiers 
+which can be compiled and run after JSON reading functionality is implemented.
+After compilatin in CakeML it will be ready to verify electronic election.

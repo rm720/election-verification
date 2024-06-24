@@ -1,0 +1,33 @@
+
+HOL Manual
+To create a file, visit it with Cntl-x Cntl-f and enter text in its buffer.
+
+Open an output window Meta h Sift h
+Copy         Meta w
+Paste        Control y
+Find a file  Control x Control+f   
+Undo         Control x u
+
+Move to beginning of line: Control a	
+Move to end of line:       Control e
+Move back to beginning of sentence: Meta a
+Move forward to end of sentence: Meta e
+
+Run selection Meta+h Meta r
+Display types on/of Meta h Control t
+Interrupt Meta+h Control c
+Push goal onto stack Meta h g
+Apply tactic Meta h e
+Unapply last tactic Meta h b
+Print current goal Meta h p
+Drop current goal Meta h d
+Start subgoal proof Meta h Meta s
+Search for a theorem Meta h m
+Autocomplete Meta /
+Remove from cursor to the end of the line: Meta K
+Move cursor to the end of the line: Meta e
+Select to the end of the line: Shift Meta e
+Go to the beginig of the line: Control a
+Interrupt: Meta h Control C
+Display types on/off: Meta h Control t
+Setting show_tags to true makes the HOL top-level print theorem tags.

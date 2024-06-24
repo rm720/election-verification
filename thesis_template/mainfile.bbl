@@ -1,0 +1,325 @@
+\begin{thebibliography}{51}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+
+\bibitem[{Hel()}]{Helios}
+Helios voting system specification.
+\newblock \url{https://heliosvoting.org/}.
+\newblock Accessed: 2023-05-13.
+
+\bibitem[{iac()}]{iacr}
+{International Association for Cryptologic Research}.
+\newblock \url{https://www.iacr.org}.
+\newblock Accessed on: \today.
+
+\bibitem[{hol(2022)}]{hol4manual}
+2022.
+\newblock \emph{HOL4 Reference Manual}.
+\newblock The HOL 4 Team, Cambridge, UK.
+\newblock \urlprefix\url{http://hol-theorem-prover.org}.
+\newblock Accessed: 2023-05-10.
+
+\bibitem[{Abrahamsson et~al.(2022)Abrahamsson, Myreen, Kumar, and
+  Sewell}]{Abrahamsson2022CandleAV}
+\textsc{Abrahamsson, O.; Myreen, M.~O.; Kumar, R.; and Sewell, T.}, 2022.
+\newblock Candle: A verified implementation of hol light.
+\newblock In \emph{International Conference on Interactive Theorem Proving}.
+
+\bibitem[{Acemyan et~al.(2015)Acemyan, Kortum, Byrne, and
+  Wallach}]{Acemyan2015FromET}
+\textsc{Acemyan, C.~Z.; Kortum, P.~T.; Byrne, M.~D.; and Wallach, D.~S.}, 2015.
+\newblock From error to error: Why voters could not cast a ballot and verify
+  their vote with helios, pr{\^e}t {\`a} voter, and scantegrity ii.
+
+\bibitem[{Adida(2008)}]{Adida2008HeliosWO}
+\textsc{Adida, B.}, 2008.
+\newblock Helios: Web-based open-audit voting.
+\newblock In \emph{USENIX Security Symposium}.
+
+\bibitem[{Almeida et~al.(2010)Almeida, Bangerter, Barbosa, Krenn, Sadeghi, and
+  Schneider}]{Almeida2010ACC}
+\textsc{Almeida, J.~B.; Bangerter, E.; Barbosa, M.; Krenn, S.; Sadeghi, A.-R.;
+  and Schneider, T.}, 2010.
+\newblock A certifying compiler for zero-knowledge proofs of knowledge based on
+  sigma-protocols.
+\newblock In \emph{IACR Cryptology ePrint Archive}.
+
+\bibitem[{Almeida et~al.(2012)Almeida, Barbosa, Bangerter, Barthe, Krenn, and
+  B{\'e}guelin}]{Almeida2012FullPC}
+\textsc{Almeida, J.~B.; Barbosa, M.; Bangerter, E.; Barthe, G.; Krenn, S.; and
+  B{\'e}guelin, S.~Z.}, 2012.
+\newblock Full proof cryptography: verifiable compilation of efficient
+  zero-knowledge protocols.
+\newblock \emph{Proceedings of the 2012 ACM conference on Computer and
+  communications security},  (2012).
+
+\bibitem[{Artin(1998)}]{Artin:1998}
+\textsc{Artin, M.}, 1998.
+\newblock \emph{Algebra}.
+\newblock Birkh{\"a}user.
+
+\bibitem[{Barthe et~al.(2009)Barthe, Gr{\'e}goire, and
+  B{\'e}guelin}]{Barthe2009FormalCO}
+\textsc{Barthe, G.; Gr{\'e}goire, B.; and B{\'e}guelin, S.~Z.}, 2009.
+\newblock Formal certification of code-based cryptographic proofs.
+\newblock In \emph{ACM-SIGACT Symposium on Principles of Programming
+  Languages}.
+
+\bibitem[{Barthe et~al.(2010)Barthe, Hedin, B{\'e}guelin, Gr{\'e}goire, and
+  Heraud}]{Barthe2010AMF}
+\textsc{Barthe, G.; Hedin, D.; B{\'e}guelin, S.~Z.; Gr{\'e}goire, B.; and
+  Heraud, S.}, 2010.
+\newblock A machine-checked formalization of sigma-protocols.
+\newblock \emph{2010 23rd IEEE Computer Security Foundations Symposium},
+  (2010), 246--260.
+
+\bibitem[{Bellare and Goldreich(1992)}]{Bellare1992OnDP}
+\textsc{Bellare, M. and Goldreich, O.}, 1992.
+\newblock On defining proofs of knowledge.
+\newblock In \emph{Annual International Cryptology Conference}.
+
+\bibitem[{Bernhard et~al.(2011)Bernhard, Cortier, Pereira, Smyth, and
+  Warinschi}]{Bernhard2011AdaptingHF}
+\textsc{Bernhard, D.; Cortier, V.; Pereira, O.; Smyth, B.; and Warinschi, B.},
+  2011.
+\newblock Adapting helios for provable ballot privacy.
+\newblock \emph{IACR Cryptol. ePrint Arch.}, 2016 (2011), 756.
+
+\bibitem[{Bernhard et~al.(2017)Bernhard, Kulyk, and
+  Volkamer}]{Bernhard2017SecurityPF}
+\textsc{Bernhard, D.; Kulyk, O.; and Volkamer, M.}, 2017.
+\newblock Security proofs for participation privacy , receipt-freeness , ballot
+  privacy , and verifiability against malicious bulletin board for the helios
+  voting scheme.
+
+\bibitem[{Bernhard et~al.(2012)Bernhard, Pereira, and
+  Warinschi}]{Bernhard2012HowNT}
+\textsc{Bernhard, D.; Pereira, O.; and Warinschi, B.}, 2012.
+\newblock How not to prove yourself: Pitfalls of the fiat-shamir heuristic and
+  applications to helios.
+\newblock In \emph{International Conference on the Theory and Application of
+  Cryptology and Information Security}.
+
+\bibitem[{Brooks(1975)}]{brooks1975mythical}
+\textsc{Brooks, F.~P.}, 1975.
+\newblock \emph{The Mythical Man-Month: Essays on Software Engineering}.
+\newblock Addison-Wesley.
+
+\bibitem[{Chan and Norrish(2018)}]{Chan2018ClassificationOF}
+\textsc{Chan, H.-L. and Norrish, M.}, 2018.
+\newblock Classification of finite fields with applications.
+\newblock \emph{Journal of Automated Reasoning}, 63 (2018), 667 -- 693.
+
+\bibitem[{Chang-Fong and Essex(2016)}]{ChangFong2016TheCS}
+\textsc{Chang-Fong, N. and Essex, A.}, 2016.
+\newblock The cloudier side of cryptographic end-to-end verifiable voting: a
+  security analysis of helios.
+\newblock \emph{Proceedings of the 32nd Annual Conference on Computer Security
+  Applications},  (2016).
+
+\bibitem[{Chaum(1981)}]{Chaum1981UntraceableEM}
+\textsc{Chaum, D.}, 1981.
+\newblock Untraceable electronic mail, return addresses, and digital
+  pseudonyms.
+\newblock In \emph{CACM}.
+
+\bibitem[{Cortier and Smyth(2011)}]{Cortier2011AttackingAF}
+\textsc{Cortier, V. and Smyth, B.}, 2011.
+\newblock Attacking and fixing helios: An analysis of ballot secrecy.
+\newblock \emph{2011 IEEE 24th Computer Security Foundations Symposium},
+  (2011), 297--311.
+
+\bibitem[{Cramer(1997)}]{Cramer1997ModularDO}
+\textsc{Cramer, R.}, 1997.
+\newblock Modular design of secure yet practical cryptographic protocols.
+
+\bibitem[{Cranor and Garfinkel(2005)}]{cranor2005security}
+\textsc{Cranor, L.~F. and Garfinkel, S.}, 2005.
+\newblock \emph{Security and Usability: Designing Secure Systems that People
+  Can Use}.
+\newblock O'Reilly Media.
+
+\bibitem[{Damg{\aa}rd(2010)}]{damgaard2010sigma}
+\textsc{Damg{\aa}rd, I.}, 2010.
+\newblock On {$\Sigma$}-protocols.
+\newblock \urlprefix\url{https://www.cs.au.dk/~ivan/Sigma.pdf}.
+\newblock Accessed on 2023-05-13.
+
+\bibitem[{ElGamal(1985)}]{ElGamal:1985}
+\textsc{ElGamal, T.}, 1985.
+\newblock A public key cryptosystem and a signature scheme based on discrete
+  logarithms.
+\newblock \emph{IEEE Transactions on Information Theory}, 31, 4  (1985),
+  469--472.
+\newblock \doi{10.1109/TIT.1985.1057074}.
+
+\bibitem[{Ghale et~al.(2018)Ghale, Pattinson, Kumar, and
+  Norrish}]{Ghale2018VerifiedCC}
+\textsc{Ghale, M.~K.; Pattinson, D.; Kumar, R.; and Norrish, M.}, 2018.
+\newblock Verified certificate checking for counting votes.
+\newblock In \emph{Verified Software: Theories, Tools, Experiments}.
+
+\bibitem[{G{\"o}del et~al.(1966)G{\"o}del, Meltzer, and
+  Schlegel}]{Gdel1966OnFU}
+\textsc{G{\"o}del, K.; Meltzer, B.; and Schlegel, R.}, 1966.
+\newblock On formally undecidable propositions of principia mathematica and
+  related systems.
+
+\bibitem[{Goldwasser et~al.(1985)Goldwasser, Micali, and
+  Rackoff}]{Goldwasser1985TheKC}
+\textsc{Goldwasser, S.; Micali, S.; and Rackoff, C.}, 1985.
+\newblock The knowledge complexity of interactive proof-systems.
+\newblock In \emph{Symposium on the Theory of Computing}.
+
+\bibitem[{Haines et~al.(2021)Haines, Gor{\'e}, and Sharma}]{Haines2021DidYM}
+\textsc{Haines, T.; Gor{\'e}, R.; and Sharma, B.}, 2021.
+\newblock Did you mix me? formally verifying verifiable mix nets in electronic
+  voting.
+\newblock \emph{2021 IEEE Symposium on Security and Privacy (SP)},  (2021),
+  1748--1765.
+
+\bibitem[{Haines et~al.(2019{\natexlab{a}})Haines, Gor{\'e}, and
+  Tiwari}]{Haines2019VerifiedVF}
+\textsc{Haines, T.; Gor{\'e}, R.; and Tiwari, M.}, 2019{\natexlab{a}}.
+\newblock Verified verifiers for verifying elections.
+\newblock \emph{Proceedings of the 2019 ACM SIGSAC Conference on Computer and
+  Communications Security},  (2019).
+
+\bibitem[{Haines et~al.(2020)Haines, Lewis, Pereira, and
+  Teague}]{Haines2020HowNT}
+\textsc{Haines, T.; Lewis, S.~J.; Pereira, O.; and Teague, V.}, 2020.
+\newblock How not to prove your election outcome.
+\newblock \emph{2020 IEEE Symposium on Security and Privacy (SP)},  (2020),
+  644--660.
+
+\bibitem[{Haines et~al.(2019{\natexlab{b}})Haines, Pattinson, and
+  Tiwari}]{Haines2019VerifiableHT}
+\textsc{Haines, T.; Pattinson, D.; and Tiwari, M.}, 2019{\natexlab{b}}.
+\newblock Verifiable homomorphic tallying for the schulze vote counting scheme.
+\newblock In \emph{Verified Software: Theories, Tools, Experiments}.
+
+\bibitem[{Haines et~al.(2022)Haines, Pereira, and Teague}]{Haines2022RunningTR}
+\textsc{Haines, T.; Pereira, O.; and Teague, V.~J.}, 2022.
+\newblock Running the race: A swiss voting story.
+\newblock In \emph{International Joint Conference on Electronic Voting}.
+
+\bibitem[{Halderman and Teague(2015)}]{Halderman2015TheNS}
+\textsc{Halderman, J.~A. and Teague, V.}, 2015.
+\newblock The new south wales ivote system: Security failures and verification
+  flaws in a live online election.
+\newblock In \emph{International Conference on E-Voting and Identity}.
+
+\bibitem[{Harrison(2006)}]{Harrison2006TowardsSO}
+\textsc{Harrison, J.}, 2006.
+\newblock Towards self-verification of hol light.
+\newblock In \emph{International Joint Conference on Automated Reasoning}.
+
+\bibitem[{Heiderich et~al.(2011)Heiderich, Frosch, Niemietz, and
+  Schwenk}]{Heiderich2011TheBT}
+\textsc{Heiderich, M.; Frosch, T.; Niemietz, M.; and Schwenk, J.}, 2011.
+\newblock The bug that made me president a browser- and web-security case study
+  on helios voting.
+\newblock In \emph{International Conference on E-Voting and Identity}.
+
+\bibitem[{Hupel and Nipkow(2018)}]{Hupel2018AVC}
+\textsc{Hupel, L. and Nipkow, T.}, 2018.
+\newblock A verified compiler from isabelle/hol to cakeml.
+\newblock In \emph{European Symposium on Programming}.
+
+\bibitem[{Kulyk et~al.(2015)Kulyk, Teague, and Volkamer}]{Kulyk2015ExtendingHT}
+\textsc{Kulyk, O.; Teague, V.; and Volkamer, M.}, 2015.
+\newblock Extending helios towards private eligibility verifiability.
+
+\bibitem[{Kumar et~al.(2014)Kumar, Arthan, Myreen, and Owens}]{Kumar2014HOLWD}
+\textsc{Kumar, R.; Arthan, R.; Myreen, M.~O.; and Owens, S.}, 2014.
+\newblock Hol with definitions: Semantics, soundness, and a verified
+  implementation.
+\newblock In \emph{International Conference on Interactive Theorem Proving}.
+
+\bibitem[{Kumar et~al.(2016)Kumar, Arthan, Myreen, and
+  Owens}]{Kumar2016SelfFormalisationOH}
+\textsc{Kumar, R.; Arthan, R.; Myreen, M.~O.; and Owens, S.}, 2016.
+\newblock Self-formalisation of higher-order logic.
+\newblock \emph{Journal of Automated Reasoning}, 56 (2016), 221--259.
+
+\bibitem[{Kumar et~al.(2015)Kumar, Myreen, Owens, and
+  Tan}]{Kumar2015ProofgroundedBO}
+\textsc{Kumar, R.; Myreen, M.~O.; Owens, S.; and Tan, Y.~K.}, 2015.
+\newblock Proof-grounded bootstrapping of a verified compiler producing a
+  verified read-eval-print loop for cakeml.
+
+\bibitem[{Myreen et~al.(2013)Myreen, Owens, and Kumar}]{Myreen2013StepsTV}
+\textsc{Myreen, M.~O.; Owens, S.; and Kumar, R.}, 2013.
+\newblock Steps towards verified implementations of hol light.
+\newblock In \emph{International Conference on Interactive Theorem Proving}.
+
+\bibitem[{Norrish(2023)}]{HOL4interaction}
+\textsc{Norrish, M.}, 2023.
+\newblock Hol interaction.
+\newblock \urlprefix\url{https://hol-theorem-prover.org/HOL-interaction.pdf}.
+\newblock Accessed: 2023-05-10.
+
+\bibitem[{Pattinson and Sch{\"u}rmann(2015)}]{Pattinson2015VoteCA}
+\textsc{Pattinson, D. and Sch{\"u}rmann, C.}, 2015.
+\newblock Vote counting as mathematical proof.
+\newblock In \emph{Australasian Conference on Artificial Intelligence}.
+
+\bibitem[{Rivest(2008)}]{Rivest2008OnTN}
+\textsc{Rivest, R.~L.}, 2008.
+\newblock On the notion of software independence in voting systems.
+\newblock \emph{Philosophical Transactions of the Royal Society A:
+  Mathematical, Physical and Engineering Sciences}, 366 (2008), 3759 -- 3767.
+
+\bibitem[{Ryan and Schneider(2009)}]{ryan2009modelling}
+\textsc{Ryan, P.~Y. and Schneider, S.~A.}, 2009.
+\newblock \emph{The Modelling and Analysis of Security Protocols: the CSP
+  Approach}.
+\newblock Addison-Wesley Professional.
+
+\bibitem[{Shoup(1997)}]{Shoup:1997}
+\textsc{Shoup, V.}, 1997.
+\newblock A proposal for an iso standard for public key encryption.
+\newblock In \emph{Advances in Cryptology -- Eurocrypt '97}, vol. 1233 of
+  \emph{Lecture Notes in Computer Science}, 369--379. Springer.
+\newblock \doi{10.1007/3-540-69053-0_32}.
+
+\bibitem[{Smyth et~al.(2015)Smyth, Frink, and Clarkson}]{Smyth2015ElectionVC}
+\textsc{Smyth, B.; Frink, S.; and Clarkson, M.~R.}, 2015.
+\newblock Election verifiability: Cryptographic definitions and an analysis of
+  helios and jcj.
+
+\bibitem[{Springall et~al.(2014)Springall, Finkenauer, Durumeric, Kitcat,
+  Hursti, MacAlpine, and Halderman}]{Springall2014SecurityAO}
+\textsc{Springall, D.; Finkenauer, T.; Durumeric, Z.; Kitcat, J.; Hursti, H.;
+  MacAlpine, M.; and Halderman, J.~A.}, 2014.
+\newblock Security analysis of the estonian internet voting system.
+\newblock \emph{Proceedings of the 2014 ACM SIGSAC Conference on Computer and
+  Communications Security},  (2014).
+
+\bibitem[{Tan et~al.(2016)Tan, Myreen, Kumar, Fox, Owens, and
+  Norrish}]{Tan2016ANV}
+\textsc{Tan, Y.~K.; Myreen, M.~O.; Kumar, R.; Fox, A. C.~J.; Owens, S.; and
+  Norrish, M.}, 2016.
+\newblock A new verified compiler backend for cakeml.
+\newblock \emph{Proceedings of the 21st ACM SIGPLAN International Conference on
+  Functional Programming},  (2016).
+
+\bibitem[{Tan et~al.(2019)Tan, Myreen, Kumar, Fox, Owens, and
+  Norrish}]{Tan2019TheVC}
+\textsc{Tan, Y.~K.; Myreen, M.~O.; Kumar, R.; Fox, A. C.~J.; Owens, S.; and
+  Norrish, M.}, 2019.
+\newblock The verified cakeml compiler backend.
+\newblock \emph{Journal of Functional Programming}, 29 (2019).
+
+\bibitem[{Yang et~al.(2011)Yang, Chen, Eide, and Regehr}]{Yang2011FindingAU}
+\textsc{Yang, X.; Chen, Y.; Eide, E.; and Regehr, J.}, 2011.
+\newblock Finding and understanding bugs in c compilers.
+\newblock In \emph{ACM-SIGPLAN Symposium on Programming Language Design and
+  Implementation}.
+
+\end{thebibliography}
