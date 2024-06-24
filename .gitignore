@@ -7,5 +7,4 @@
 *.HOLMK*
 *.sml~
 *Holmakefile
-*.DS_Store
 *.hol-vscode
